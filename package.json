@@ -159,7 +159,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/blockstack/stacks-wallet-gh-actions-test.git"
+    "url": "git@github.com:blockstack/stacks-wallet.git"
   },
   "license": "MIT",
   "bugs": {
