@@ -94,19 +94,6 @@
     }
   },
   "release": {
-    "branches": [
-      {
-        "name": "legacy/3.x.x",
-        "range": "3.x.x",
-        "channel": "3.x.x"
-      },
-      {
-        "name": "next",
-        "range": "4.x.x",
-        "prerelease": true
-      },
-      "master"
-    ],
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
