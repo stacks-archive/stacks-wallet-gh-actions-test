@@ -96,46 +96,14 @@
   "release": {
     "plugins": [
       "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
       [
         "@semantic-release/npm",
         {
           "npmPublish": false
         }
       ],
-      [
-        "@semantic-release/github",
-        {
-          "assets": [
-            {
-              "path": "release/**/*.msi",
-              "label": "Windows distribution"
-            },
-            {
-              "path": "release/**/*.dmg",
-              "label": "OSX distribution"
-            },
-            {
-              "path": "release/**/*.rpm",
-              "label": "Linux distribution"
-            },
-            {
-              "path": "release/**/*.deb",
-              "label": "Debian distribution"
-            }
-          ]
-        }
-      ],
       "@semantic-release/changelog",
-      "@semantic-release/git",
-      [
-        "semantic-release-slack-bot",
-        {
-          "notifyOnSuccess": true,
-          "notifyOnFail": true,
-          "markdownReleaseNotes": true
-        }
-      ]
+      "@semantic-release/git"
     ]
   },
   "commitlint": {
@@ -186,6 +154,8 @@
     "@blockstack/stacks-blockchain-api-types": "0.28.0",
     "@commitlint/cli": "11.0.0",
     "@commitlint/config-conventional": "11.0.0",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
     "@types/argon2-browser": "1.12.0",
     "@types/bcryptjs": "2.4.2",
     "@types/bn.js": "4.11.6",
@@ -257,6 +227,7 @@
     "react-test-renderer": "17.0.1",
     "redux-logger": "3.0.6",
     "rimraf": "3.0.2",
+    "semantic-release-slack-bot": "^1.7.0",
     "sinon": "9.0.3",
     "style-loader": "2.0.0",
     "terser-webpack-plugin": "4.2.1",
