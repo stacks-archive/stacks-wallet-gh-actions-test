@@ -94,6 +94,18 @@
     }
   },
   "release": {
+    "branches": [
+      {
+        "name": "legacy/3.x.x",
+        "range": "3.x.x",
+        "channel": "3.x.x"
+      },
+      {
+        "name": "beta",
+        "prerelease": true
+      },
+      "master"
+    ],
     "plugins": [
       "@semantic-release/commit-analyzer",
       "@semantic-release/release-notes-generator",
