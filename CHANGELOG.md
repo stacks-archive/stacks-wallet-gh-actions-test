@@ -1,3 +1,10 @@
+# [4.0.0-beta.2](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.1...v4.0.0-beta.2) (2021-01-06)
+
+
+### Features
+
+* add another tag trigger ([99ed5ec](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/99ed5ec0758cbd31e6333b0c9bec5b7575113e21))
+
 # [4.0.0-beta.1](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v3.0.0...v4.0.0-beta.1) (2021-01-06)
 
 
