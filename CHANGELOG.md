@@ -1,3 +1,10 @@
+# [4.0.0-beta.4](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.3...v4.0.0-beta.4) (2021-01-06)
+
+
+### Features
+
+* bad commit message ([37858de](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/37858de54effbde554b133c3ab329af0beecfd3c))
+
 # [4.0.0-beta.3](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2021-01-06)
 
 
