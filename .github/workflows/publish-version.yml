@@ -1,9 +1,6 @@
 name: Publish version
 
 on:
-  push:
-    tags:
-      - 'v*'
   create:
     tags:
       - 'v*'
@@ -115,6 +112,13 @@ jobs:
 
       - run: ls -R release
 
+      - name: Extract version
+        id: extract_version
+        uses: Saionaro/extract-package-version@v1.0.6
+      # From now you can access the version
+      - name: Print version
+        run: echo ${{ steps.extract_version.outputs.version }}
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -133,6 +137,7 @@ jobs:
         with:
           # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           upload_url: ${{ steps.create_release.outputs.upload_url }}
+          tag_name: ${{steps.extract_version.outputs.version}}
           asset_path: ./release/
           asset_name: .zip
           asset_content_type: application/zip
