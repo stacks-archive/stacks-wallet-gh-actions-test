@@ -22,6 +22,8 @@ import { App } from './pages/app';
 import { Settings } from './pages/settings/settings';
 import { Stacking } from './pages/stacking/stacking';
 
+console.log('sdlkjsfd');
+
 export const routerConfig = [
   {
     path: routes.HOME,
