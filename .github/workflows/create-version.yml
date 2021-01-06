@@ -107,7 +107,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
           SEMANTIC_RELEASE_PACKAGE: ${{ github.workflow }}
         with:
-          # These plugins aren't packaged with semantic-release by default. So specify them here to ensure they get installed during this Github Action
           extra_plugins: |
             @semantic-release/changelog
             @semantic-release/git
