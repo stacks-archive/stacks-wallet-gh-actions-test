@@ -46,38 +46,13 @@
     ],
     "plugins": [
       "@semantic-release/commit-analyzer",
-      "@semantic-release/release-notes-generator",
       [
         "@semantic-release/npm",
         {
           "npmPublish": false
         }
       ],
-      [
-        "@semantic-release/github",
-        {
-          "successComment": false,
-          "failComment": false,
-          "assets": [
-            {
-              "path": "release/**/*.msi",
-              "label": "stacks-wallet-win-${nextRelease.version}.msi"
-            },
-            {
-              "path": "release/**/*.dmg",
-              "label": "stacks-wallet-mac-${nextRelease.version}.dmg"
-            },
-            {
-              "path": "release/**/*.rpm",
-              "label": "stacks-wallet-linux-${nextRelease.version}.rpm"
-            },
-            {
-              "path": "release/**/*.deb",
-              "label": "stacks-wallet-linux-${nextRelease.version}.deb"
-            }
-          ]
-        }
-      ],
+      "@semantic-release/release-notes-generator",
       "@semantic-release/changelog",
       "@semantic-release/git"
     ]
