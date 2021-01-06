@@ -1,3 +1,10 @@
+# [4.0.0-beta.3](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2021-01-06)
+
+
+### Features
+
+* upload assets ([9109898](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/9109898ca34d3935d07f3bef7ac8f25783021627))
+
 # [4.0.0-beta.2](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.1...v4.0.0-beta.2) (2021-01-06)
 
 
