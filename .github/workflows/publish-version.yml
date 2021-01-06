@@ -131,7 +131,6 @@ jobs:
           prerelease: contains(github.ref, 'beta')
 
       - name: Upload Release Asset .deb
-        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -143,7 +142,6 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload Release Asset .rpm
-        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -155,7 +153,6 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload Release Asset .msi
-        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -167,7 +164,6 @@ jobs:
           asset_content_type: application/octet-stream
 
       - name: Upload Release Asset .dmg
-        id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
