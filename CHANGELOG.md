@@ -4,6 +4,15 @@
 ### Features
 
 * add another tag trigger ([249a15a](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/249a15a6a1395754ed0b752c62047545619f3019))
+* increment version ([d19140a](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/d19140a38546f43b60178a574a581c7dfe1597d2))
+* lsdjfsklf ([1a11bc5](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/1a11bc5c1583b5e10aec4c5ffc74e567382a26f0))
+
+# [4.0.0-beta.3](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2021-01-06)
+
+
+### Features
+
+* add another tag trigger ([249a15a](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/249a15a6a1395754ed0b752c62047545619f3019))
 * lsdjfsklf ([1a11bc5](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/1a11bc5c1583b5e10aec4c5ffc74e567382a26f0))
 
 # [4.0.0-beta.3](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2021-01-06)
