@@ -126,11 +126,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
           tag_name: ${{steps.extract_version.outputs.version}}
-          release_name: Release ${{ github.ref }}
+          release_name: Release ${{steps.extract_version.outputs.version}}
           draft: false
           prerelease: contains(github.ref, 'beta')
 
-      - name: Upload Release Asset
+      - name: Upload Release Asset .deb
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
@@ -138,9 +138,45 @@ jobs:
         with:
           # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release/
-          asset_name: .zip
-          asset_content_type: application/zip
+          asset_path: release/stacks-wallet-linux/stacks-wallet.testnet.deb
+          asset_name: stacks-wallet.testnet.deb
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Asset .rpm
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: release/stacks-wallet-linux/stacks-wallet.testnet.rpm
+          asset_name: stacks-wallet.testnet.rpm
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Asset .msi
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: release/stacks-wallet-win/stacks-wallet.testnet.msi
+          asset_name: stacks-wallet.testnet.msi
+          asset_content_type: application/octet-stream
+
+      - name: Upload Release Asset .dmg
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: release/stacks-wallet-mac/stacks-wallet.testnet.dmg
+          asset_name: stacks-wallet.testnet.dmg
+          asset_content_type: application/octet-stream
 
   # Notify Discord channel of workflow end
   notify-end:
