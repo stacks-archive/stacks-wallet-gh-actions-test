@@ -1,90 +1,11 @@
-name: Wallet Release
+name: Create version
 
 on:
   push:
-    branches:
-      - 'master'
-      - 'beta'
-    tags-ignore:
-      - '**'
-    paths-ignore:
-      - '**/CHANGELOG.md'
-      - '**/package.json'
-      - '**/yarn.lock'
-  pull_request:
-  workflow_dispatch:
+    tags:
+      - 'v*'
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
-
-      - name: Use Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 10
-
-      - name: Cache node_modules
-        id: cache
-        uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-yarn
-
-      - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          yarn
-          yarn add -ED @actions/core
-        env:
-          STX_NETWORK: testnet
-
-      - name: Lint eslint
-        run: yarn lint:eslint
-
-      - name: Check exact versions
-        uses: ./.github/actions/check-version-lock
-
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Use Node.js
-        uses: actions/setup-node@v1
-        with:
-          node-version: 10
-
-      - name: Cache node_modules
-        id: cache
-        uses: actions/cache@v2
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-            ${{ runner.os }}-yarn
-
-      - name: Install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: yarn
-        env:
-          STX_NETWORK: testnet
-
-      - name: Build prod
-        run: yarn build
-        env:
-          STX_NETWORK: testnet
-
-      - name: Run jest
-        run: yarn test
-
   build:
     runs-on: ${{ matrix.os }}
 
@@ -171,25 +92,16 @@ jobs:
             release/**/*.deb
             release/**/*.rpm
 
-  release:
+  publish:
     runs-on: ubuntu-latest
     outputs:
       new_release_published: ${{ steps.semantic.outputs.new_release_published }}
       new_release_version: ${{ steps.semantic.outputs.new_release_version }}
-    needs:
-      - lint
-      - test
-      - build
 
     steps:
       - uses: actions/checkout@v2
         with:
           token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
-
-      - name: Download distributables
-        uses: actions/download-artifact@v2
-        with:
-          path: release/
 
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v2.5.3
@@ -204,12 +116,21 @@ jobs:
             @semantic-release/changelog
             @semantic-release/git
 
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: contains(github.ref, 'beta')
+
   # Notify Discord channel of workflow end
   notify-end:
     runs-on: ubuntu-latest
     needs:
-      - lint
-      - test
       - build
       - release
     if: always()
@@ -221,4 +142,4 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         uses: Ilshidur/action-discord@master
         with:
-          args: 'A new version (v[${{needs.release.outputs.new_release_version}}](https://github.com/${{ github.repository }}/releases/tag/v${{needs.release.outputs.new_release_version}})) of the ${{ github.workflow }} has been released.'
+          args: 'A new version ([v${{needs.release.outputs.new_release_version}}](https://github.com/${{ github.repository }}/releases/tag/v${{needs.release.outputs.new_release_version}})) of the ${{ github.workflow }} has been released.'
