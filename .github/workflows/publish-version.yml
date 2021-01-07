@@ -228,7 +228,6 @@ jobs:
       - publish-assets-mainnet
       - publish-assets-testnet
 
-    if: always()
     steps:
       - name: Discord notification
         # Only run if a new release was published
