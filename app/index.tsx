@@ -7,6 +7,8 @@ import { configureStore, history } from './store/configureStore';
 
 const { store, persistor } = configureStore();
 
+console.log('sldkjfsl');
+
 const AppContainer = process.env.PLAIN_HMR ? Fragment : ReactHotAppContainer;
 
 document.addEventListener('DOMContentLoaded', () => {
