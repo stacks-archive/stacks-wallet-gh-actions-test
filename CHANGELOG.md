@@ -4,6 +4,14 @@
 ### Features
 
 * adjust matrix ([a1be12a](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/a1be12af75b2922c87062db38dfd0865e5a1aa25))
+* lskdjflskd ([12a439f](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/12a439f794f4b330492503e9ac9425129fd42981))
+
+# [4.0.0-beta.13](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.12...v4.0.0-beta.13) (2021-01-07)
+
+
+### Features
+
+* adjust matrix ([a1be12a](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/a1be12af75b2922c87062db38dfd0865e5a1aa25))
 
 # [4.0.0-beta.13](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.12...v4.0.0-beta.13) (2021-01-07)
 
