@@ -13,6 +13,7 @@ jobs:
       STX_NETWORK: ${{ matrix.stx_network }}
 
     strategy:
+      fail-fast: true
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         stx_network: [testnet, mainnet]
@@ -99,7 +100,7 @@ jobs:
             release/**/*.deb
             release/**/*.rpm
 
-  create-release-mainnet:
+  create-release:
     runs-on: ubuntu-latest
     needs:
       - build
@@ -116,45 +117,22 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: v${{ needs.build.outputs.version }}
           release_name: Release v${{ needs.build.outputs.version }}
           draft: false
           prerelease: ${{ contains(needs.build.outputs.version, 'beta') }}
 
-  create-release-testnet:
+  publish-assets:
     runs-on: ubuntu-latest
     needs:
       - build
-
-    outputs:
-      release_upload_url: ${{ steps.create_release.outputs.upload_url }}
-
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ needs.build.outputs.version }}
-          release_name: '[Testnet] v${{ needs.build.outputs.version }}'
-          draft: false
-          prerelease: ${{ contains(needs.build.outputs.version, 'beta') }}
-
-  publish-assets-mainnet:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - create-release-mainnet
+      - create-release
 
     strategy:
       matrix:
+        stx_network: [testnet, mainnet]
         include:
           - ext: dmg
             os: mac
@@ -169,7 +147,7 @@ jobs:
       - name: Download binaries
         uses: actions/download-artifact@v2
         with:
-          path: release/
+          path: release
 
       - run: ls -R release
 
@@ -178,44 +156,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ needs.create-release-mainnet.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-${{ matrix.os }}/stacks-wallet.mainnet.${{ matrix.ext }}
-          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.${{ matrix.ext }}
-          asset_content_type: application/octet-stream
-
-  publish-assets-testnet:
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - create-release-testnet
-
-    strategy:
-      matrix:
-        include:
-          - ext: dmg
-            os: mac
-          - ext: msi
-            os: win
-          - ext: rpm
-            os: linux
-          - ext: deb
-            os: linux
-
-    steps:
-      - name: Download binaries
-        uses: actions/download-artifact@v2
-        with:
-          path: release/
-
-      - run: ls -R release
-
-      - name: Upload Release Asset .${{ matrix.ext }}
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release-testnet.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-${{ matrix.os }}/stacks-wallet.testnet.${{ matrix.ext }}
+          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+          asset_path: release/stacks-wallet-${{ matrix.os }}/stacks-wallet.${{ matrix.stx_network }}.${{ matrix.ext }}
           asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.${{ matrix.ext }}
           asset_content_type: application/octet-stream
 
@@ -223,10 +165,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
-      - create-release-mainnet
-      - create-release-testnet
-      - publish-assets-mainnet
-      - publish-assets-testnet
+      - publish-assets
 
     steps:
       - name: Discord notification
