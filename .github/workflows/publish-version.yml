@@ -131,6 +131,7 @@ jobs:
       - create-release
 
     strategy:
+      max-parallel: 2
       matrix:
         stx_network: [testnet, mainnet]
         ext: [dmg, msi, deb, rpm]
