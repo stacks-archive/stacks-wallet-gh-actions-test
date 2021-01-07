@@ -1,6 +1,9 @@
 name: Typecheck
 
-on: [push]
+on:
+  push:
+    tags-ignore:
+      - '**'
 
 jobs:
   build:

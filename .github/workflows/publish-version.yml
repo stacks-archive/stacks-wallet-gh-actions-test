@@ -133,6 +133,7 @@ jobs:
     strategy:
       matrix:
         stx_network: [testnet, mainnet]
+        ext: [dmg, msi, deb, rpm]
         include:
           - ext: dmg
             os: mac
