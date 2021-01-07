@@ -1,3 +1,10 @@
+# [4.0.0-beta.27](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.26...v4.0.0-beta.27) (2021-01-07)
+
+
+### Features
+
+* sleep between ([8eb967c](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/8eb967c77a217effea14925865b2fe342860cc0c))
+
 # [4.0.0-beta.26](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.25...v4.0.0-beta.26) (2021-01-07)
 
 
