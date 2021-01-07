@@ -1,3 +1,10 @@
+# [4.0.0-beta.9](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.8...v4.0.0-beta.9) (2021-01-07)
+
+
+### Features
+
+* sldkjfslk ([1c340ed](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/1c340edfce9c982e404e5f67866215c79e764b2d))
+
 # [4.0.0-beta.8](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.7...v4.0.0-beta.8) (2021-01-07)
 
 
