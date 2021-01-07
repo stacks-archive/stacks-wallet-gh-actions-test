@@ -172,6 +172,11 @@ jobs:
           asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.rpm
           asset_content_type: application/octet-stream
 
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
+
       - name: Upload Release Asset Testnet .deb
         uses: actions/upload-release-asset@v1
         env:
@@ -181,6 +186,11 @@ jobs:
           asset_path: release/stacks-wallet-testnet-linux/stacks-wallet.testnet.deb
           asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.deb
           asset_content_type: application/octet-stream
+
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
 
       - name: Upload Release Asset Testnet .msi
         uses: actions/upload-release-asset@v1
@@ -192,7 +202,12 @@ jobs:
           asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.msi
           asset_content_type: application/octet-stream
 
-      - name: Upload Release Asset .dmg
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
+
+      - name: Upload Release Asset Testnet .dmg
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -201,6 +216,11 @@ jobs:
           asset_path: release/stacks-wallet-testnet-mac/stacks-wallet.testnet.dmg
           asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.dmg
           asset_content_type: application/octet-stream
+
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
 
       - name: Upload Release Asset Mainnet .rpm
         uses: actions/upload-release-asset@v1
@@ -212,6 +232,11 @@ jobs:
           asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.rpm
           asset_content_type: application/octet-stream
 
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
+
       - name: Upload Release Asset Mainnet .deb
         uses: actions/upload-release-asset@v1
         env:
@@ -222,6 +247,11 @@ jobs:
           asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.deb
           asset_content_type: application/octet-stream
 
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
+
       - name: Upload Release Asset Mainnet .msi
         uses: actions/upload-release-asset@v1
         env:
@@ -231,6 +261,11 @@ jobs:
           asset_path: release/stacks-wallet-mainnet-win/stacks-wallet.mainnet.msi
           asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.msi
           asset_content_type: application/octet-stream
+
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
 
       - name: Upload Release Asset Mainnet .dmg
         uses: actions/upload-release-asset@v1
