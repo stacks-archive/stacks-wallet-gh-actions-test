@@ -92,7 +92,6 @@ jobs:
             release/**/*.deb
             release/**/*.rpm
 
-
   create-release:
     runs-on: ubuntu-latest
     needs:
@@ -137,11 +136,16 @@ jobs:
       - create-release
     strategy:
       matrix:
-        extension:
-          - deb
-          - rpm
-          - dmg
-          - msi
+        includes:
+          - os: mac
+            extension: dmg
+          - os: win
+            extension: msi
+          - os: linux
+            extension: rpm
+          - os: linux
+            extension: deb
+
 
     steps:
       - name: Download binaries
@@ -157,10 +161,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-linux/stacks-wallet.testnet.${{ matrix.extension }}
+          asset_path: release/stacks-wallet-${{ matrix.os }}/stacks-wallet.testnet.${{ matrix.extension }}
           asset_name: stacks-wallet.testnet.v${{ needs.create-release.outputs.wallet_version }}.${{ matrix.extension }}
           asset_content_type: application/octet-stream
-
 
   # Notify Discord channel of workflow end
   notify-end:
