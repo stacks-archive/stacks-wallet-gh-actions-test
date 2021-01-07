@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+env:
+  STX_NETWORK: testnet
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -50,13 +53,9 @@ jobs:
       # using separate run to install those packages separately
       - name: Install packages
         run: yarn --frozen-lockfile --ignore-scripts
-        env:
-          STX_NETWORK: testnet
 
       - name: Install `app/` packages
         run: cd app && yarn --frozen-lockfile --ignore-scripts
-        env:
-          STX_NETWORK: testnet
 
       - name: Build releases
         run: ./node_modules/.bin/cross-env yarn package-${{ matrix.NPM_COMMAND }}
@@ -65,7 +64,6 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PULL_REQUEST: ${{ steps.vars.outputs.pull_request_id }}
           BRANCH_NAME: ${{ steps.vars.outputs.branch_name }}
-          STX_NETWORK: testnet
 
       - uses: actions/upload-artifact@v2
         name: Windows upload
@@ -129,7 +127,6 @@ jobs:
       - create-release
     strategy:
       matrix:
-        # ext: [dmg, msi, deb, rpm]
         include:
           - ext: dmg
             os: mac
