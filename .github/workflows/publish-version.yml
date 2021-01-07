@@ -131,7 +131,7 @@ jobs:
       - create-release
 
     strategy:
-      max-parallel: 1
+      max-parallel: 2
       matrix:
         stx_network: [testnet, mainnet]
         ext: [dmg, msi, deb, rpm]
@@ -166,7 +166,6 @@ jobs:
   announce-release:
     runs-on: ubuntu-latest
     needs:
-      - build
       - upload-release-assets
 
     steps:
@@ -178,8 +177,4 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-           New release: Stacks Wallet `v${{needs.release.outputs.new_release_version}}`.
-           [Download mainnet build](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.build.outputs.version }})).
-           Download testnet build.
-
-           A new version ([v${{needs.release.outputs.new_release_version}}](https://github.com/${{ github.repository }}/releases/tag/v${{needs.release.outputs.new_release_version}})) of the ${{ github.workflow }} has been released.
+           New release: [Stacks Wallet `v${{needs.release.outputs.new_release_version}}`](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.build.outputs.version }}))
