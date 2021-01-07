@@ -1,3 +1,10 @@
+# [4.0.0-beta.12](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.11...v4.0.0-beta.12) (2021-01-07)
+
+
+### Features
+
+* adjust matrix ([70d30bb](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/70d30bb3a181ce3c0bdbbcb06ff96dce134fb7de))
+
 # [4.0.0-beta.11](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.10...v4.0.0-beta.11) (2021-01-07)
 
 
