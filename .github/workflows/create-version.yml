@@ -17,7 +17,6 @@ on:
 env:
   STX_NETWORK: testnet
 
-
 jobs:
   lint:
     runs-on: ubuntu-latest
