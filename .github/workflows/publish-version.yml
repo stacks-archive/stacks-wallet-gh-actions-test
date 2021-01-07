@@ -1,9 +1,5 @@
 name: Publish version
 
-# on:
-#   create:
-#     tags:
-#       - 'v*'
 on:
   push:
     tags:
@@ -133,11 +129,7 @@ jobs:
       - create-release
     strategy:
       matrix:
-        ext:
-          - dmg
-          - msi
-          - deb
-          - rpm
+        ext: [dmg, msi, deb, rpm]
         includes:
           - ext: dmg
             os: mac
