@@ -1,3 +1,10 @@
+# [4.0.0-beta.28](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.27...v4.0.0-beta.28) (2021-01-07)
+
+
+### Features
+
+* test rpm linux????? ([3a8ad4b](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/3a8ad4ba43ab63b5ea3dbe733381400ba9d51277))
+
 # [4.0.0-beta.27](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.26...v4.0.0-beta.27) (2021-01-07)
 
 
