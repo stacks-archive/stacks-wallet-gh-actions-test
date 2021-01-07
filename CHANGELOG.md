@@ -1,3 +1,10 @@
+# [4.0.0-beta.10](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.9...v4.0.0-beta.10) (2021-01-07)
+
+
+### Features
+
+* use matrix ([906aff8](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/906aff8b38b646706fde83de21e16131aebffecc))
+
 # [4.0.0-beta.9](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.8...v4.0.0-beta.9) (2021-01-07)
 
 
