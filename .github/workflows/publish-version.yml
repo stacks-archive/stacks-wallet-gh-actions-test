@@ -151,7 +151,7 @@ jobs:
         with:
           path: release
 
-      - run: ls -R release
+      - run: ls -la release/stacks-wallet-mainnet-linux
 
       # - name: Upload Release Asset .${{ matrix.ext }}
       #   uses: actions/upload-release-asset@v1
@@ -162,6 +162,22 @@ jobs:
       #     asset_path: release/stacks-wallet-${{ matrix.stx_network }}-${{ matrix.os }}/stacks-wallet.${{ matrix.stx_network }}.${{ matrix.ext }}
       #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.${{ matrix.ext }}
       #     asset_content_type: application/octet-stream
+
+      - name: Sleep for 10 seconds
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '10s'
+
+      - name: Upload Release Asset Mainnet .rpm
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+          asset_path: release/stacks-wallet-mainnet-linux/stacks-wallet.mainnet.rpm
+          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.rpm
+          asset_content_type: application/octet-stream
+
       - name: Upload Release Asset Testnet .rpm
         uses: actions/upload-release-asset@v1
         env:
@@ -215,21 +231,6 @@ jobs:
           upload_url: ${{ needs.create-release.outputs.release_upload_url }}
           asset_path: release/stacks-wallet-testnet-mac/stacks-wallet.testnet.dmg
           asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.dmg
-          asset_content_type: application/octet-stream
-
-      - name: Sleep for 10 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
-
-      - name: Upload Release Asset Mainnet .rpm
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-mainnet-linux/stacks-wallet.mainnet.rpm
-          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.rpm
           asset_content_type: application/octet-stream
 
       - name: Sleep for 10 seconds
