@@ -81,7 +81,7 @@ const networkConfigs = {
     productName: 'Stacks Wallet',
     appId: 'so.hiro.StacksWallet',
     icon: 'icon-512x512.png',
-    artifactName: 'stacks-wallet.${ext}',
+    artifactName: 'stacks-wallet.mainnet.${ext}',
     mac: {
       icon: 'icon.icns',
       appId: 'so.hiro.StacksWallet',

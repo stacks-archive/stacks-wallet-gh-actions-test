@@ -2,7 +2,7 @@ name: Typecheck
 
 on:
   push:
-    tags-ignore:
+    branches:
       - '**'
 
 jobs:
