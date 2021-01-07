@@ -128,7 +128,7 @@ jobs:
           tag_name: v${{steps.extract_version.outputs.version}}
           release_name: Release v${{steps.extract_version.outputs.version}}
           draft: false
-          prerelease: contains(steps.extract_version.outputs.version, 'beta')
+          prerelease: ${{contains(steps.extract_version.outputs.version, 'beta')}}
 
       - name: Upload Release Asset .deb
         uses: actions/upload-release-asset@v1
