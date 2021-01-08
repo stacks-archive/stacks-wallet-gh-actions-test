@@ -130,20 +130,22 @@ jobs:
       - build
       - create-release
 
-    # strategy:
-    #   max-parallel: 1
-    #   matrix:
-    #     stx_network: [testnet, mainnet]
-    #     ext: [dmg, msi, deb, rpm]
-    #     include:
-    #       - ext: dmg
-    #         os: mac
-    #       - ext: msi
-    #         os: win
-    #       - ext: rpm
-    #         os: linux
-    #       - ext: deb
-    #         os: linux
+    continue-on-error: true
+
+    strategy:
+      max-parallel: 1
+      matrix:
+        stx_network: [testnet, mainnet]
+        ext: [dmg, msi, deb, rpm]
+        include:
+          - ext: dmg
+            os: mac
+          - ext: msi
+            os: win
+          - ext: rpm
+            os: linux
+          - ext: deb
+            os: linux
 
     steps:
       - name: Download binaries
@@ -151,32 +153,32 @@ jobs:
         with:
           path: release
 
-      - run: ls -la release/stacks-wallet-mainnet-linux
+      - run: ls -R release
 
-      # - name: Upload Release Asset .${{ matrix.ext }}
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-      #     asset_path: release/stacks-wallet-${{ matrix.stx_network }}-${{ matrix.os }}/stacks-wallet.${{ matrix.stx_network }}.${{ matrix.ext }}
-      #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.${{ matrix.ext }}
-      #     asset_content_type: application/octet-stream
-
-      - name: Sleep for 10 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
-
-      - name: Upload Release Asset Mainnet .rpm
+      - name: Upload Release Asset .${{ matrix.ext }}
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-mainnet-linux/stacks-wallet.mainnet.rpm
-          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.rpm
+          asset_path: release/stacks-wallet-${{ matrix.stx_network }}-${{ matrix.os }}/stacks-wallet.${{ matrix.stx_network }}.${{ matrix.ext }}
+          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.${{ matrix.ext }}
           asset_content_type: application/octet-stream
+
+      - name: Sleep
+        uses: jakejarvis/wait-action@master
+        with:
+          time: '20s'
+
+      # - name: Upload Release Asset Mainnet .rpm
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+      #     asset_path: release/stacks-wallet-mainnet-linux/stacks-wallet.mainnet.rpm
+      #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.rpm
+      #     asset_content_type: application/octet-stream
 
       # - name: Upload Release Asset Testnet .rpm
       #   uses: actions/upload-release-asset@v1
@@ -188,95 +190,95 @@ jobs:
       #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.rpm
       #     asset_content_type: application/octet-stream
 
-      - name: Sleep for 10 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
+      # - name: Sleep for 10 seconds
+      #   uses: jakejarvis/wait-action@master
+      #   with:
+      #     time: '10s'
 
-      - name: Upload Release Asset Testnet .deb
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-testnet-linux/stacks-wallet.testnet.deb
-          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.deb
-          asset_content_type: application/octet-stream
+      # - name: Upload Release Asset Testnet .deb
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+      #     asset_path: release/stacks-wallet-testnet-linux/stacks-wallet.testnet.deb
+      #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.deb
+      #     asset_content_type: application/octet-stream
 
-      - name: Sleep for 10 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
+      # - name: Sleep for 10 seconds
+      #   uses: jakejarvis/wait-action@master
+      #   with:
+      #     time: '10s'
 
-      - name: Upload Release Asset Testnet .msi
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-testnet-win/stacks-wallet.testnet.msi
-          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.msi
-          asset_content_type: application/octet-stream
+      # - name: Upload Release Asset Testnet .msi
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+      #     asset_path: release/stacks-wallet-testnet-win/stacks-wallet.testnet.msi
+      #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.msi
+      #     asset_content_type: application/octet-stream
 
-      - name: Sleep for 10 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
+      # - name: Sleep for 10 seconds
+      #   uses: jakejarvis/wait-action@master
+      #   with:
+      #     time: '10s'
 
-      - name: Upload Release Asset Testnet .dmg
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-testnet-mac/stacks-wallet.testnet.dmg
-          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.dmg
-          asset_content_type: application/octet-stream
+      # - name: Upload Release Asset Testnet .dmg
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+      #     asset_path: release/stacks-wallet-testnet-mac/stacks-wallet.testnet.dmg
+      #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.dmg
+      #     asset_content_type: application/octet-stream
 
-      - name: Sleep for 10 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
+      # - name: Sleep for 10 seconds
+      #   uses: jakejarvis/wait-action@master
+      #   with:
+      #     time: '10s'
 
-      - name: Upload Release Asset Mainnet .deb
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-mainnet-linux/stacks-wallet.mainnet.deb
-          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.deb
-          asset_content_type: application/octet-stream
+      # - name: Upload Release Asset Mainnet .deb
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+      #     asset_path: release/stacks-wallet-mainnet-linux/stacks-wallet.mainnet.deb
+      #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.deb
+      #     asset_content_type: application/octet-stream
 
-      - name: Sleep for 10 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
+      # - name: Sleep for 10 seconds
+      #   uses: jakejarvis/wait-action@master
+      #   with:
+      #     time: '10s'
 
-      - name: Upload Release Asset Mainnet .msi
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-mainnet-win/stacks-wallet.mainnet.msi
-          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.msi
-          asset_content_type: application/octet-stream
+      # - name: Upload Release Asset Mainnet .msi
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+      #     asset_path: release/stacks-wallet-mainnet-win/stacks-wallet.mainnet.msi
+      #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.msi
+      #     asset_content_type: application/octet-stream
 
-      - name: Sleep for 10 seconds
-        uses: jakejarvis/wait-action@master
-        with:
-          time: '10s'
+      # - name: Sleep for 10 seconds
+      #   uses: jakejarvis/wait-action@master
+      #   with:
+      #     time: '10s'
 
-      - name: Upload Release Asset Mainnet .dmg
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create-release.outputs.release_upload_url }}
-          asset_path: release/stacks-wallet-mainnet-mac/stacks-wallet.mainnet.dmg
-          asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.dmg
-          asset_content_type: application/octet-stream
+      # - name: Upload Release Asset Mainnet .dmg
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ needs.create-release.outputs.release_upload_url }}
+      #     asset_path: release/stacks-wallet-mainnet-mac/stacks-wallet.mainnet.dmg
+      #     asset_name: stacks-wallet.testnet.v${{ needs.build.outputs.version }}.dmg
+      #     asset_content_type: application/octet-stream
 
   announce-release:
     runs-on: ubuntu-latest
@@ -292,4 +294,4 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-           New release: [Stacks Wallet `v${{needs.release.outputs.new_release_version}}`](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.build.outputs.version }}))
+           New release: [Stacks Wallet `v${{ needs.release.outputs.new_release_version }}`](https://github.com/${{ github.repository }}/releases/tag/v${{ needs.build.outputs.version }}))
