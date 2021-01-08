@@ -61,7 +61,12 @@ jobs:
       # Windows build breaks when using the package.json script to install `app/` packages
       # using separate run to install those packages separately
       - name: Install packages
-        run: yarn --frozen-lockfile --ignore-scripts
+        uses: nick-invision/retry@v2
+        with:
+          timeout_seconds: 660
+          max_attempts: 3
+          retry_on: error
+          command: yarn --frozen-lockfile --ignore-scripts
 
       - name: Install `app/` packages
         run: cd app && yarn --frozen-lockfile --ignore-scripts
@@ -168,7 +173,7 @@ jobs:
       - name: Sleep
         uses: jakejarvis/wait-action@master
         with:
-          time: '20s'
+          time: '10s'
 
       # - name: Upload Release Asset Mainnet .rpm
       #   uses: actions/upload-release-asset@v1
