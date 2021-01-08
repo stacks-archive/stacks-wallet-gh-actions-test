@@ -1,3 +1,10 @@
+# [4.0.0-beta.32](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.31...v4.0.0-beta.32) (2021-01-08)
+
+
+### Features
+
+* ffs had same file name ([396aa0c](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/396aa0c69dabe37254c96e3aa61dfa82ca50a39a))
+
 # [4.0.0-beta.31](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.30...v4.0.0-beta.31) (2021-01-08)
 
 
