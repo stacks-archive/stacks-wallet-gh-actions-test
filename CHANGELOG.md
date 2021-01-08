@@ -1,3 +1,10 @@
+# [4.0.0-beta.30](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.29...v4.0.0-beta.30) (2021-01-08)
+
+
+### Features
+
+* test ([1748374](https://github.com/blockstack/stacks-wallet-gh-actions-test/commit/1748374658c02fcb2d07fc56e66ac28f0e930d3a))
+
 # [4.0.0-beta.29](https://github.com/blockstack/stacks-wallet-gh-actions-test/compare/v4.0.0-beta.28...v4.0.0-beta.29) (2021-01-07)
 
 
