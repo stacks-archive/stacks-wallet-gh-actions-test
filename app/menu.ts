@@ -68,7 +68,7 @@ export default class MenuBuilder {
 
   buildDarwinTemplate() {
     const subMenuAbout: DarwinMenuItemConstructorOptions = {
-      label: 'Stacks Wallet',
+      label: 'Stacks Wallet sdfshdfj',
       submenu: [
         {
           label: 'About Stacks Wallet',

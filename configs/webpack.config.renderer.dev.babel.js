@@ -129,6 +129,10 @@ export default merge(baseConfig, {
       debug: true,
     }),
 
+    // new webpack.ProvidePlugin({
+    //   Buffer: ['buffer', 'Buffer'],
+    // }),
+
     new CopyPlugin({
       patterns: [{ from: 'node_modules/argon2-browser/dist/argon2.wasm', to: '.' }],
     }),
