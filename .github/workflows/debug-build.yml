@@ -1,142 +1,142 @@
-name: Debug build
+# name: Debug build
 
-on: [pull_request]
+# on: [pull_request]
 
-jobs:
-  announce-start:
-    runs-on: ubuntu-latest
+# jobs:
+#   announce-start:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: lucasmotta/pull-request-sticky-header@1.0.0
-        with:
-          header: '> _Currently building new release, please wait for the latest_&nbsp; <img src="https://user-images.githubusercontent.com/1618764/97873036-51dfb200-1d17-11eb-89f5-0a922dc3ac92.gif" width="12" />'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#     steps:
+#       - uses: lucasmotta/pull-request-sticky-header@1.0.0
+#         with:
+#           header: '> _Currently building new release, please wait for the latest_&nbsp; <img src="https://user-images.githubusercontent.com/1618764/97873036-51dfb200-1d17-11eb-89f5-0a922dc3ac92.gif" width="12" />'
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  debug-build:
-    runs-on: ${{ matrix.os }}
-    needs:
-      - announce-start
+#   debug-build:
+#     runs-on: ${{ matrix.os }}
+#     needs:
+#       - announce-start
 
-    env:
-      STX_NETWORK: ${{ matrix.stx_network }}
+#     env:
+#       STX_NETWORK: ${{ matrix.stx_network }}
 
-    strategy:
-      matrix:
-        os: [macos-latest, ubuntu-latest, windows-latest]
-        stx_network: [testnet, mainnet]
-        include:
-          - os: macos-latest
-            NPM_COMMAND: mac
-            UPLOAD_ASSETS: release/**/*.dmg
-            CSC_LINK_SECRET_NAME: CODE_SIGNING_CERTIFICATE_APPLE
-            CSC_KEY_PASSWORD_SECRET_NAME: CODE_SIGNING_PASSWORD_APPLE
+#     strategy:
+#       matrix:
+#         os: [macos-latest, ubuntu-latest, windows-latest]
+#         stx_network: [testnet, mainnet]
+#         include:
+#           - os: macos-latest
+#             NPM_COMMAND: mac
+#             UPLOAD_ASSETS: release/**/*.dmg
+#             CSC_LINK_SECRET_NAME: CODE_SIGNING_CERTIFICATE_APPLE
+#             CSC_KEY_PASSWORD_SECRET_NAME: CODE_SIGNING_PASSWORD_APPLE
 
-          - os: ubuntu-latest
-            NPM_COMMAND: linux
-            UPLOAD_ASSETS: |
-              release/**/*.deb
-              release/**/*.rpm
+#           - os: ubuntu-latest
+#             NPM_COMMAND: linux
+#             UPLOAD_ASSETS: |
+#               release/**/*.deb
+#               release/**/*.rpm
 
-          - os: windows-latest
-            NPM_COMMAND: win
-            UPLOAD_ASSETS: release/**/*.exe
-            CSC_LINK_SECRET_NAME: CODE_SIGNING_CERTIFICATE_WINDOWS
-            CSC_KEY_PASSWORD_SECRET_NAME: CODE_SIGNING_PASSWORD_WINDOWS
+#           - os: windows-latest
+#             NPM_COMMAND: win
+#             UPLOAD_ASSETS: release/**/*.exe
+#             CSC_LINK_SECRET_NAME: CODE_SIGNING_CERTIFICATE_WINDOWS
+#             CSC_KEY_PASSWORD_SECRET_NAME: CODE_SIGNING_PASSWORD_WINDOWS
 
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.6.0
-        with:
-          access_token: ${{ secrets.GITHUB_TOKEN }}
+#     steps:
+#       - name: Cancel Previous Runs
+#         uses: styfle/cancel-workflow-action@0.6.0
+#         with:
+#           access_token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check out Git repository
-        uses: actions/checkout@v1
+#       - name: Check out Git repository
+#         uses: actions/checkout@v1
 
-      - uses: actions/cache@v2
-        id: cache-node-modules
-        with:
-          path: '**/node_modules'
-          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/package.json') }}
+#       - uses: actions/cache@v2
+#         id: cache-node-modules
+#         with:
+#           path: '**/node_modules'
+#           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/package.json') }}
 
-      - name: Variables
-        id: vars
-        run: |
-          echo "::set-output name=version::$(cat package.json | jq -r .version)"
-          echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
-          echo "::set-output name=pull_request_id::$(echo $GITHUB_REF)"
+#       - name: Variables
+#         id: vars
+#         run: |
+#           echo "::set-output name=version::$(cat package.json | jq -r .version)"
+#           echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
+#           echo "::set-output name=pull_request_id::$(echo $GITHUB_REF)"
 
-      - name: Install code-signing certs - Apple only
-        uses: apple-actions/import-codesign-certs@v1
-        if: matrix.os == 'macos-latest'
-        with:
-          p12-file-base64: ${{ secrets.CODE_SIGNING_CERTIFICATE_APPLE }}
-          p12-password: ${{ secrets.CODE_SIGNING_PASSWORD_APPLE }}
+#       - name: Install code-signing certs - Apple only
+#         uses: apple-actions/import-codesign-certs@v1
+#         if: matrix.os == 'macos-latest'
+#         with:
+#           p12-file-base64: ${{ secrets.CODE_SIGNING_CERTIFICATE_APPLE }}
+#           p12-password: ${{ secrets.CODE_SIGNING_PASSWORD_APPLE }}
 
-      - name: Setup node
-        uses: actions/setup-node@v2
-        with:
-          node-version: 12
+#       - name: Setup node
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: 12
 
-      #
-      # Windows build breaks when using the package.json script to install `app/` packages
-      # using separate run to install those packages separately
-      - name: Install packages
-        uses: nick-invision/retry@v2
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        with:
-          timeout_seconds: 600
-          max_attempts: 3
-          retry_on: error
-          command: yarn --frozen-lockfile --ignore-scripts
+#       #
+#       # Windows build breaks when using the package.json script to install `app/` packages
+#       # using separate run to install those packages separately
+#       - name: Install packages
+#         uses: nick-invision/retry@v2
+#         if: steps.cache-node-modules.outputs.cache-hit != 'true'
+#         with:
+#           timeout_seconds: 600
+#           max_attempts: 3
+#           retry_on: error
+#           command: yarn --frozen-lockfile --ignore-scripts
 
-      - name: Install `app/` packages
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-        run: cd app && yarn --frozen-lockfile --ignore-scripts
+#       - name: Install `app/` packages
+#         if: steps.cache-node-modules.outputs.cache-hit != 'true'
+#         run: cd app && yarn --frozen-lockfile --ignore-scripts
 
-      - name: Extract version
-        id: extract_version
-        uses: Saionaro/extract-package-version@v1.0.6
+#       - name: Extract version
+#         id: extract_version
+#         uses: Saionaro/extract-package-version@v1.0.6
 
-      - name: Build releases
-        run: ./node_modules/.bin/cross-env yarn package-${{ matrix.NPM_COMMAND }}
-        env:
-          DEBUG_PROD: true
-          NODE_ENV: production
-          SHA: ${{ github.event.pull_request.head.sha }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PULL_REQUEST: ${{ steps.vars.outputs.pull_request_id }}
-          BRANCH_NAME: ${{ steps.vars.outputs.branch_name }}
-          CSC_LINK: ${{ secrets[matrix.CSC_LINK_SECRET_NAME] }}
-          CSC_KEY_PASSWORD: ${{ secrets[matrix.CSC_KEY_PASSWORD_SECRET_NAME] }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
+#       - name: Build releases
+#         run: ./node_modules/.bin/cross-env yarn package-${{ matrix.NPM_COMMAND }}
+#         env:
+#           DEBUG_PROD: true
+#           NODE_ENV: production
+#           SHA: ${{ github.event.pull_request.head.sha }}
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           PULL_REQUEST: ${{ steps.vars.outputs.pull_request_id }}
+#           BRANCH_NAME: ${{ steps.vars.outputs.branch_name }}
+#           CSC_LINK: ${{ secrets[matrix.CSC_LINK_SECRET_NAME] }}
+#           CSC_KEY_PASSWORD: ${{ secrets[matrix.CSC_KEY_PASSWORD_SECRET_NAME] }}
+#           APPLE_ID: ${{ secrets.APPLE_ID }}
+#           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
 
-      - run: ls -R release
+#       - run: ls -R release
 
-      - uses: actions/upload-artifact@v2
-        name: ${{ matrix.NPM_COMMAND }} ${{ matrix.stx_network }} upload
-        with:
-          name: stacks-wallet-${{ matrix.stx_network }}-${{ matrix.NPM_COMMAND }}
-          path: ${{ matrix.UPLOAD_ASSETS }}
+#       - uses: actions/upload-artifact@v2
+#         name: ${{ matrix.NPM_COMMAND }} ${{ matrix.stx_network }} upload
+#         with:
+#           name: stacks-wallet-${{ matrix.stx_network }}-${{ matrix.NPM_COMMAND }}
+#           path: ${{ matrix.UPLOAD_ASSETS }}
 
-  announce-completion:
-    runs-on: ubuntu-latest
+#   announce-completion:
+#     runs-on: ubuntu-latest
 
-    if: always()
+#     if: always()
 
-    needs:
-      - debug-build
+#     needs:
+#       - debug-build
 
-    steps:
-      - uses: lucasmotta/pull-request-sticky-header@1.0.0
-        if: (!contains(needs.*.result, 'failure'))
-        with:
-          header: '> [Download the latest build](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#     steps:
+#       - uses: lucasmotta/pull-request-sticky-header@1.0.0
+#         if: (!contains(needs.*.result, 'failure'))
+#         with:
+#           header: '> [Download the latest build](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})'
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Remove header if build failed
-      - uses: lucasmotta/pull-request-sticky-header@1.0.0
-        if: (contains(needs.*.result, 'failure'))
-        with:
-          header: '> _Build failed, [see here for details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})_'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       # Remove header if build failed
+#       - uses: lucasmotta/pull-request-sticky-header@1.0.0
+#         if: (contains(needs.*.result, 'failure'))
+#         with:
+#           header: '> _Build failed, [see here for details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})_'
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

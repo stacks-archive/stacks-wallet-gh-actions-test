@@ -11,7 +11,7 @@ if (!['mainnet', 'testnet'].includes(process.env.STX_NETWORK)) {
 }
 
 const baseConfig = {
-  afterSign: 'scripts/notarize.js',
+  // afterSign: 'scripts/notarize.js',
   files: [
     'dist/',
     'node_modules/',
@@ -42,7 +42,7 @@ const baseConfig = {
     publisherName: 'Hiro Systems PBC',
   },
   mac: {
-    hardenedRuntime: true,
+    // hardenedRuntime: true,
     category: 'public.app-category.finance',
     entitlements: 'resources/entitlements.mac.plist',
     entitlementsInherit: 'resources/entitlements.mac.plist',
