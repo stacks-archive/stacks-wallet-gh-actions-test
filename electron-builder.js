@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const deepMerge = require('deepmerge');
+const packageJson = require('./package.json');
 
 const network = process.env.STX_NETWORK || 'testnet';
 
@@ -10,9 +11,11 @@ if (!['mainnet', 'testnet'].includes(process.env.STX_NETWORK)) {
 }
 
 const baseConfig = {
+  // afterSign: 'scripts/notarize.js',
   files: [
     'dist/',
     'node_modules/',
+    'resources/',
     'app.html',
     'main.prod.js',
     'main.prod.js.map',
@@ -34,30 +37,27 @@ const baseConfig = {
     ],
   },
   win: {
-    target: ['nsis', 'msi'],
+    // Don't use `msi` installer issues
+    target: ['nsis'],
+    publisherName: 'Hiro Systems PBC',
   },
   mac: {
-    hardenedRuntime: false,
+    // hardenedRuntime: true,
     category: 'public.app-category.finance',
+    entitlements: 'resources/entitlements.mac.plist',
+    entitlementsInherit: 'resources/entitlements.mac.plist',
   },
   linux: {
-    target: ['deb', 'rpm', 'AppImage'],
-    category: 'Development',
+    target: ['deb', 'rpm'],
+    category: 'Finance',
   },
   directories: {
     buildResources: 'resources',
     output: 'release',
   },
-  publish: {
-    provider: 'github',
-    owner: 'blockstack',
-    repo: 'blockstack',
-    private: false,
+  extraMetadata: {
+    version: packageJson.version,
   },
-  // protocols: {
-  //   name: 'stacks-wallet',
-  //   schemes: ['stacks-wallet'],
-  // },
 };
 
 const networkConfigs = {
@@ -67,35 +67,43 @@ const networkConfigs = {
     artifactName: 'stacks-wallet.testnet.${ext}',
     mac: {
       icon: 'icon.testnet.icns',
-      appId: 'so.hiro.StacksWalletTestnet',
+    },
+    win: {
+      icon: 'icon.testnet.ico',
     },
     linux: {
-      icon: './icons',
+      icon: 'icons-testnet',
     },
     // macos `Application Support` dir name
     extraMetadata: {
-      productName: 'StacksWalletTestnet',
+      name: 'stacks-wallet-testnet',
+      productName: 'Stacks Wallet Testnet',
     },
   },
   mainnet: {
     productName: 'Stacks Wallet',
     appId: 'so.hiro.StacksWallet',
     icon: 'icon-512x512.png',
-    artifactName: 'stacks-wallet.${ext}',
+    artifactName: 'stacks-wallet.mainnet.${ext}',
     mac: {
       icon: 'icon.icns',
-      appId: 'so.hiro.StacksWallet',
+    },
+    win: {
+      icon: 'icon.mainnet.ico',
     },
     linux: {
-      icon: 'icon-512x512.png',
+      icon: 'icons-mainnet',
     },
     extraMetadata: {
-      productName: 'StacksWallet',
+      name: 'stacks-wallet',
+      productName: 'Stacks Wallet',
     },
   },
 };
 
 const mergedConfig = deepMerge(baseConfig, networkConfigs[network]);
+
+console.log(process.env.CI, process.platform);
 
 console.log(JSON.stringify(mergedConfig, null, 2));
 

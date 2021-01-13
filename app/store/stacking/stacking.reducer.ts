@@ -8,6 +8,7 @@ import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { RootState } from '..';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import relativeTime from 'dayjs/plugin/relativeTime';
 import { NETWORK } from '@constants/index';
 import { selectIsStackingCallPending } from '@store/pending-transaction';
 import {
@@ -20,6 +21,9 @@ import {
 } from './stacking.actions';
 import { stxToMicroStx } from '@utils/unit-convert';
 import { StackerInfo as StackerInfoFromClient } from '@stacks/stacking';
+
+dayjs.extend(duration);
+dayjs.extend(relativeTime);
 
 export enum StackingStatus {
   NotStacking = 'NotStacking',
@@ -39,7 +43,7 @@ export interface StackingState {
     'poxInfo' | 'coreNodeInfo' | 'blockTimeInfo' | 'stackerInfo',
     boolean
   >;
-  error: string | null;
+  errors: Record<'poxInfo' | 'coreNodeInfo' | 'blockTimeInfo' | 'stackerInfo', boolean>;
   contractCallTx: string | null;
   poxInfo: CoreNodePoxResponse | null;
   coreNodeInfo: CoreNodeInfoResponse | null;
@@ -54,7 +58,12 @@ const initialState: StackingState = {
     blockTimeInfo: false,
     stackerInfo: false,
   },
-  error: null,
+  errors: {
+    poxInfo: false,
+    coreNodeInfo: false,
+    blockTimeInfo: false,
+    stackerInfo: false,
+  },
   contractCallTx: null,
   poxInfo: null,
   coreNodeInfo: null,
@@ -79,14 +88,22 @@ export const stackingSlice = createSlice({
       action: PayloadAction<CoreNodeInfoResponse>
     ) => {
       state.initialRequestsComplete.coreNodeInfo = true;
+      state.errors.coreNodeInfo = false;
       state.coreNodeInfo = action.payload;
+    },
+    [fetchCoreDetails.rejected.toString()]: state => {
+      state.errors.coreNodeInfo = true;
     },
     [fetchBlockTimeInfo.fulfilled.toString()]: (
       state,
       action: PayloadAction<NetworkBlockTimesResponse>
     ) => {
+      state.errors.blockTimeInfo = false;
       state.initialRequestsComplete.blockTimeInfo = true;
       state.blockTimeInfo = action.payload;
+    },
+    [fetchBlockTimeInfo.rejected.toString()]: state => {
+      state.errors.blockTimeInfo = true;
     },
     [fetchStackerInfo.fulfilled.toString()]: (
       state,
@@ -94,14 +111,14 @@ export const stackingSlice = createSlice({
     ) => {
       state.initialRequestsComplete.stackerInfo = true;
       if ('error' in action.payload || !action.payload.stacked) {
-        state.error = 'There was an error stacking';
         return;
       }
       state.stackerInfo = action.payload.details;
-      state.error = null;
+      state.errors.stackerInfo = false;
     },
     [fetchStackerInfo.rejected.toString()]: state => {
       state.initialRequestsComplete.stackerInfo = true;
+      state.errors.stackerInfo = true;
     },
     [activeStackingTx.toString()]: (state, action: PayloadAction<{ txId: string }>) => {
       state.contractCallTx = action.payload.txId;
@@ -121,7 +138,7 @@ export const selectBlockTimeInfo = createSelector(
   state => state.blockTimeInfo
 );
 
-export const selectStackingError = createSelector(selectStackingState, state => state.error);
+export const selectStackingError = createSelector(selectStackingState, state => state.errors);
 
 export const selectLoadingStacking = createSelector(
   selectStackingState,
@@ -194,26 +211,24 @@ export const selectNextCycleInfo = createSelector(
 
     const nextCycleStartingAt = new Date();
     nextCycleStartingAt.setSeconds(nextCycleStartingAt.getSeconds() + secondsToNextCycle);
-    dayjs.extend(duration);
 
-    const timeUntilCycle = {
-      hours: dayjs.duration(secondsToNextCycle, 'seconds').asHours(),
-      days: dayjs.duration(secondsToNextCycle, 'seconds').asDays(),
-      weeks: dayjs.duration(secondsToNextCycle, 'seconds').asWeeks(),
-    };
+    const now = dayjs();
+    const timeOfNextCycle = now.add(secondsToNextCycle, 'second');
+    const formattedTimeToNextCycle = dayjs().to(timeOfNextCycle, true);
 
-    const formattedTimeToNextCycle =
-      timeUntilCycle.weeks > 1
-        ? '~' + Math.ceil(timeUntilCycle.weeks).toString() + ' weeks'
-        : timeUntilCycle.days < 1
-        ? '~' + Math.ceil(timeUntilCycle.hours).toString() + ' hours'
-        : '~' + Math.ceil(timeUntilCycle.days).toString() + ' days';
+    const estimateCycleDurationSeconds =
+      poxInfo.reward_cycle_length * blockTimeInfo[NETWORK].target_block_time;
+
+    const estimateCycleDuration = dayjs
+      .duration(estimateCycleDurationSeconds, 'seconds')
+      .humanize();
 
     return {
       nextCycleStartBlock,
       secondsToNextCycle,
+      estimateCycleDurationSeconds,
+      estimateCycleDuration,
       nextCycleStartingAt,
-      timeUntilCycle,
       formattedTimeToNextCycle,
       blocksToNextCycle,
       isStackingCallPending,
@@ -225,10 +240,13 @@ export const selectNextCycleInfo = createSelector(
 // eslint-disable-next-line @typescript-eslint/no-empty-function
 export const stackingWillBeExecuted = createSelector(selectStackingState, () => {});
 
-export const selectEstimatedStackingCycleDuration = createSelector(
-  selectStackingState,
-  ({ poxInfo, blockTimeInfo }) => {
-    if (poxInfo === null || blockTimeInfo === null) return 0;
-    return poxInfo.reward_cycle_length * blockTimeInfo[NETWORK].target_block_time;
-  }
-);
+export const selectEstimatedStackingDuration = (cycles: number) =>
+  createSelector(selectStackingState, ({ poxInfo, blockTimeInfo }) => {
+    if (poxInfo === null || blockTimeInfo === null) return '—';
+    return dayjs
+      .duration(
+        poxInfo.reward_cycle_length * blockTimeInfo[NETWORK].target_block_time * cycles,
+        'seconds'
+      )
+      .humanize();
+  });

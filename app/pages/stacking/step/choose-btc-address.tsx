@@ -6,6 +6,7 @@ import validate from 'bitcoin-address-validation';
 import { ErrorText } from '@components/error-text';
 import { ErrorLabel } from '@components/error-label';
 import { NETWORK, SUPPORTED_BTC_ADDRESS_FORMATS } from '@constants/index';
+import { StackingStepState } from '../stacking';
 
 import {
   StackingStep,
@@ -17,13 +18,14 @@ interface ChooseBtcAddressStepProps {
   id: string;
   step?: number;
   isComplete: boolean;
+  state: StackingStepState;
   value?: string;
   onEdit(): void;
   onComplete(address: string): void;
 }
 
 export const ChooseBtcAddressStep: FC<ChooseBtcAddressStepProps> = props => {
-  const { isComplete, step, id, value, onEdit, onComplete } = props;
+  const { isComplete, state, step, id, value, onEdit, onComplete } = props;
 
   const btcAddressForm = useFormik({
     initialValues: { btcAddress: '' },
@@ -32,6 +34,9 @@ export const ChooseBtcAddressStep: FC<ChooseBtcAddressStepProps> = props => {
       if (!address) return { btcAddress: 'Invalid BTC address' };
       if (NETWORK === 'mainnet' && address.network === 'testnet') {
         return { btcAddress: 'Testnet addresses not supported on Mainnet' };
+      }
+      if (NETWORK === 'testnet' && address.network !== 'testnet') {
+        return { btcAddress: 'Mainnet addresses not supported on Testnet' };
       }
       // https://github.com/blockstack/stacks-blockchain/issues/1902
       if (!SUPPORTED_BTC_ADDRESS_FORMATS.includes(address.type as any)) {
@@ -45,7 +50,14 @@ export const ChooseBtcAddressStep: FC<ChooseBtcAddressStepProps> = props => {
   });
 
   return (
-    <StackingStep title={id} step={step} value={value} isComplete={isComplete} onEdit={onEdit}>
+    <StackingStep
+      title={id}
+      step={step}
+      state={state}
+      value={value}
+      isComplete={isComplete}
+      onEdit={onEdit}
+    >
       <StackingStepDescription>
         Choose the address where you’d like to receive Bitcoin.
       </StackingStepDescription>

@@ -6,7 +6,7 @@ import { useHotkeys } from 'react-hotkeys-hook';
 import { Api } from '@api/api';
 import { increment, decrement } from '@utils/mutate-numbers';
 import { RootState } from '@store/index';
-import { openInExplorer } from '@utils/external-links';
+import { openTxInExplorer } from '@utils/external-links';
 import { selectAddress } from '@store/keys';
 import { selectActiveNodeApi } from '@store/stacks-node';
 import { selectAddressBalance, selectAvailableBalance } from '@store/address';
@@ -44,6 +44,9 @@ import { TransactionListItemPending } from '@components/home/transaction-list/tr
 import { StackingCard } from '@components/home/stacking-card';
 import { StackingLoading } from '@components/home/stacking-loading';
 import { StackingBeginsSoonCard } from '@components/home/stacking-begins-soon-card';
+import { StackingError } from '@components/home/stacking-error-card';
+
+import { HomeLayout } from './home-layout';
 
 import { HomeLayout } from './home-layout';
 import { TransactionListItemMempool } from '@components/home/transaction-list/transaction-list-item-mempool';
@@ -51,7 +54,6 @@ import { useMempool } from '@hooks/use-mempool';
 
 export const Home: FC = () => {
   const dispatch = useDispatch();
-
   const {
     address,
     balance,
@@ -141,7 +143,7 @@ export const Home: FC = () => {
             activeTxIdRef={focusedTxIdRef}
             key={pTx.tx_id}
             tx={pTx}
-            onSelectTx={openInExplorer}
+            onSelectTx={openTxInExplorer}
           />
         ))}
         {txs.map(tx => (
@@ -151,7 +153,7 @@ export const Home: FC = () => {
             key={tx.tx_id}
             tx={tx}
             address={address}
-            onSelectTx={openInExplorer}
+            onSelectTx={openTxInExplorer}
           />
         ))}
       </TransactionList>
@@ -159,6 +161,7 @@ export const Home: FC = () => {
   );
   const balanceCard = (
     <BalanceCard
+      address={address}
       lockedStx={stackerInfo?.amount_microstx}
       balance={balance}
       onSelectSend={() => dispatch(homeActions.openTxModal())}
@@ -182,6 +185,7 @@ export const Home: FC = () => {
       <StackingBeginsSoonCard blocksTillNextCycle={nextCycleInfo?.blocksToNextCycle} />
     ),
     [HomeCardState.StackingActive]: <StackingCard />,
+    [HomeCardState.StackingError]: <StackingError />,
     [HomeCardState.PostStacking]: <></>,
   };
 

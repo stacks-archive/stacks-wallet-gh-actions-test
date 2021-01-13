@@ -1,23 +1,24 @@
 import React, { FC } from 'react';
 import { Flex, Text } from '@blockstack/ui';
-import { openExternalLink } from '@utils/external-links';
 
+import { openExternalLink } from '@utils/external-links';
+import { NETWORK } from '@constants/index';
 import packageJson from '../../package.json';
 
-const sha = process.env.SHA;
+const sha = CONFIG.SHA;
 const shaShort = sha && sha.substr(0, 7);
-const pullRequest = process.env.PULL_REQUEST;
-const branchName = process.env.BRANCH_NAME;
+const pullRequest = CONFIG.PULL_REQUEST;
+const branchName = CONFIG.BRANCH_NAME;
 const version = packageJson.version;
 
 const issueParams = new URLSearchParams();
 const issueTitle = `[${String(packageJson.version)}] Bug: <describe issue>`;
-const issueLabels = 'bug,reported-from-ui';
+const issueLabels = `bug,reported-from-ui,4.x,${NETWORK}`;
 const issueBody = `
 <!--
 
   Thanks for creating an issue. Please include as much detail as possible,
-  including screenshots, operating system, and steps to recreate.
+  including screenshots, operating system, and steps to recreate the problem.
 
   If you have any questions, ask @kyranjamie on Github, Discord and Twitter.
 
@@ -43,13 +44,18 @@ export const BetaNotice: FC = () => {
   return (
     <Flex
       textStyle="caption.medium"
+      fontSize="11px"
       color="ink.400"
       position="fixed"
-      right={0}
-      bottom="base"
-      flexDirection={['column', 'row']}
+      right="8px"
+      bottom="8px"
+      border="1px solid #F0F0F0"
+      borderRadius="24px"
+      bg="white"
+      py="4px"
+      px="base-tight"
     >
-      <Text mr="base-tight" onClick={openIssueLink} textDecoration="underline" cursor="pointer">
+      <Text mr="tight" onClick={openIssueLink} textDecoration="underline" cursor="pointer">
         Found a bug? Open an issue
       </Text>
       {pullRequest && branchName && (
@@ -63,7 +69,7 @@ export const BetaNotice: FC = () => {
         </Text>
       )}
       {shaShort && (
-        <Text mr="base">
+        <Text mr="base-tight">
           Commit:{' '}
           <Text
             cursor="pointer"
@@ -76,7 +82,7 @@ export const BetaNotice: FC = () => {
           </Text>
         </Text>
       )}
-      <Text mr="base">[{packageJson.version}]</Text>
+      <Text>[{packageJson.version}]</Text>
     </Flex>
   );
 };

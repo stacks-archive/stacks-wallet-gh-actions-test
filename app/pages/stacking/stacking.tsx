@@ -1,4 +1,4 @@
-import React, { FC, useState, useCallback } from 'react';
+import React, { FC, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { BigNumber } from 'bignumber.js';
 
@@ -9,7 +9,7 @@ import { RootState } from '@store/index';
 import { selectWalletType } from '@store/keys';
 import { selectActiveNodeApi } from '@store/stacks-node';
 import {
-  selectEstimatedStackingCycleDuration,
+  selectEstimatedStackingDuration,
   selectNextCycleInfo,
   selectPoxInfo,
 } from '@store/stacking';
@@ -32,48 +32,55 @@ enum Step {
   ConfirmAndLock = 'Confirm and lock',
 }
 
-type StepState = 'incomplete' | 'complete' | null;
+export type StackingStepState = 'open' | 'closed';
 
 export const Stacking: FC = () => {
   useBackButton(routes.HOME);
 
   const [amount, setAmount] = useState<BigNumber | null>(null);
-  const [cycles, setCycles] = useState(12);
+  const [cycles, setCycles] = useState<number | null>(null);
   const [btcAddress, setBtcAddress] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
 
-  const [stepConfirmation, setStepConfirmation] = useState<Record<Step, StepState>>({
-    [Step.ChooseAmount]: 'incomplete',
-    [Step.ChooseCycles]: 'incomplete',
-    [Step.ChooseBtcAddress]: 'incomplete',
-    [Step.ConfirmAndLock]: null,
+  const [stepState, setStepState] = useState<Record<Step, StackingStepState>>({
+    [Step.ChooseAmount]: 'open',
+    [Step.ChooseCycles]: 'closed',
+    [Step.ChooseBtcAddress]: 'closed',
+    [Step.ConfirmAndLock]: 'open',
   });
+
+  const stepComplete = {
+    [Step.ChooseAmount]: amount !== null && stepState[Step.ChooseAmount] === 'closed',
+    [Step.ChooseCycles]: cycles !== null && stepState[Step.ChooseCycles] === 'closed',
+    [Step.ChooseBtcAddress]: btcAddress !== null && stepState[Step.ChooseBtcAddress] === 'closed',
+    [Step.ConfirmAndLock]: true,
+  };
 
   const { stackingCycleDuration, availableBalance, nextCycleInfo, poxInfo } = useSelector(
     (state: RootState) => ({
       walletType: selectWalletType(state),
       activeNode: selectActiveNodeApi(state),
-      stackingCycleDuration: selectEstimatedStackingCycleDuration(state),
+      stackingCycleDuration: selectEstimatedStackingDuration(cycles || 1)(state),
       availableBalance: selectAvailableBalance(state),
       nextCycleInfo: selectNextCycleInfo(state),
       poxInfo: selectPoxInfo(state),
     })
   );
 
-  const calcStackingDuration = useCallback(() => stackingCycleDuration * cycles, [
-    stackingCycleDuration,
-    cycles,
-  ]);
-
-  const updateStep = (step: Step, to: StepState) =>
-    setStepConfirmation(state => ({ ...state, [step]: to }));
-
-  const isComplete = (step: Step) => stepConfirmation[step] === 'complete';
+  const updateStep = (step: Step, to: StackingStepState) => {
+    if (step === Step.ChooseAmount && to === 'closed') {
+      setStepState(state => ({ ...state, [Step.ChooseCycles]: 'open' }));
+    }
+    if (step === Step.ChooseCycles && to === 'closed') {
+      setStepState(state => ({ ...state, [Step.ChooseBtcAddress]: 'open' }));
+    }
+    setStepState(state => ({ ...state, [step]: to }));
+  };
 
   const formComplete =
-    [Step.ChooseAmount, Step.ChooseCycles, Step.ChooseBtcAddress].every(isComplete) && !!btcAddress;
-
-  const estimatedStackingDuration = '~' + (calcStackingDuration() / 60 / 60).toString() + ' hours';
+    [Step.ChooseAmount, Step.ChooseCycles, Step.ChooseBtcAddress].every(
+      value => stepComplete[value]
+    ) && !!btcAddress;
 
   const balance = availableBalance === null ? new BigNumber(0) : new BigNumber(availableBalance);
 
@@ -85,11 +92,11 @@ export const Stacking: FC = () => {
 
   const stackingInfoCard = (
     <StackingInfoCard
-      cycles={cycles}
+      cycles={cycles || 1}
       balance={amount}
       startDate={nextCycleInfo.nextCycleStartingAt}
       blocksPerCycle={poxInfo.reward_cycle_length}
-      duration={estimatedStackingDuration}
+      duration={stackingCycleDuration}
     />
   );
 
@@ -97,34 +104,40 @@ export const Stacking: FC = () => {
     <StackingFormContainer>
       <ChooseAmountStep
         id={Step.ChooseAmount}
-        isComplete={isComplete(Step.ChooseAmount)}
+        isComplete={stepComplete[Step.ChooseAmount]}
+        state={stepState[Step.ChooseAmount]}
         value={amount}
         balance={balance}
         minimumAmountToStack={poxInfo.paddedMinimumStackingAmountMicroStx}
-        onEdit={() => updateStep(Step.ChooseAmount, 'incomplete')}
-        onComplete={amount => (setAmount(amount), updateStep(Step.ChooseAmount, 'complete'))}
+        onEdit={() => updateStep(Step.ChooseAmount, 'open')}
+        onComplete={amount => (setAmount(amount), updateStep(Step.ChooseAmount, 'closed'))}
       />
       <ChooseCycleStep
         id={Step.ChooseCycles}
-        cycles={cycles}
-        isComplete={isComplete(Step.ChooseCycles)}
-        onEdit={() => updateStep(Step.ChooseCycles, 'incomplete')}
-        onComplete={() => updateStep(Step.ChooseCycles, 'complete')}
+        cycles={cycles || 1}
+        isComplete={stepComplete[Step.ChooseCycles]}
+        state={stepState[Step.ChooseCycles]}
+        onEdit={() => updateStep(Step.ChooseCycles, 'open')}
+        onComplete={cycles => {
+          setCycles(cycles);
+          updateStep(Step.ChooseCycles, 'closed');
+        }}
         onUpdate={cycle => setCycles(cycle)}
       />
       <ChooseBtcAddressStep
         id={Step.ChooseBtcAddress}
         value={btcAddress || undefined}
-        isComplete={isComplete(Step.ChooseBtcAddress)}
-        onEdit={() => updateStep(Step.ChooseBtcAddress, 'incomplete')}
+        isComplete={stepComplete[Step.ChooseBtcAddress]}
+        state={stepState[Step.ChooseBtcAddress]}
+        onEdit={() => updateStep(Step.ChooseBtcAddress, 'open')}
         onComplete={address => (
-          setBtcAddress(address), updateStep(Step.ChooseBtcAddress, 'complete')
+          setBtcAddress(address), updateStep(Step.ChooseBtcAddress, 'closed')
         )}
       />
       <ConfirmAndLockStep
         id={Step.ConfirmAndLock}
         formComplete={formComplete}
-        estimatedDuration={estimatedStackingDuration}
+        estimatedDuration={stackingCycleDuration}
         timeUntilNextCycle={nextCycleInfo.formattedTimeToNextCycle}
         onConfirmAndLock={() => setModalOpen(true)}
       />
@@ -133,11 +146,12 @@ export const Stacking: FC = () => {
 
   return (
     <>
+      a
       {modalOpen && btcAddress && amount !== null && (
         <StackingModal
           onClose={() => setModalOpen(false)}
           amountToStack={amount}
-          numCycles={cycles}
+          numCycles={cycles || 1}
           poxAddress={btcAddress}
         />
       )}

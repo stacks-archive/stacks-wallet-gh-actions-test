@@ -17,26 +17,18 @@ import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
 import { app, BrowserWindow, clipboard, ipcMain, Menu, session } from 'electron';
-import { autoUpdater } from 'electron-updater';
-import log from 'electron-log';
+import Store from 'electron-store';
 import windowState from 'electron-window-state';
 import contextMenu from 'electron-context-menu';
+
 import MenuBuilder from './menu';
 import { deriveKey } from './crypto/key-generation';
-import Store from 'electron-store';
+import { validateConfig } from './main/validate-config';
+import { getUserDataPath } from './main/get-user-data-path';
 
 // CSP enabled in production mode, don't warn in development
 delete process.env.ELECTRON_ENABLE_SECURITY_WARNINGS;
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
-
-// eslint-disable-next-line import/no-default-export
-export default class AppUpdater {
-  constructor() {
-    log.transports.file.level = 'info';
-    autoUpdater.logger = log;
-    void autoUpdater.checkForUpdatesAndNotify();
-  }
-}
 
 contextMenu({ showCopyImage: false, showSearchWithGoogle: false });
 
@@ -50,6 +42,9 @@ if (process.env.NODE_ENV === 'production') {
 if (process.env.NODE_ENV === 'development' || process.env.DEBUG_PROD === 'true') {
   require('electron-debug')();
 }
+
+app.setPath('userData', getUserDataPath(app));
+app.setPath('logs', path.join(getUserDataPath(app), 'logs'));
 
 const installExtensions = () => {
   const installer = require('electron-devtools-installer');
@@ -66,12 +61,19 @@ const createWindow = async () => {
     await installExtensions();
   }
 
+  // https://github.com/electron/electron/issues/22995
+  session.defaultSession.setSpellCheckerDictionaryDownloadURL('https://00.00/');
+  session.fromPartition('some-partition').setSpellCheckerDictionaryDownloadURL('https://00.00/');
+
   const mainWindowState = windowState({
     defaultWidth: 1024,
     defaultHeight: 728,
   });
 
-  console.log(path.join(__dirname, '../resources/icon-512x512.png'));
+  const iconPath =
+    process.env.STX_NETWORK === 'mainnet'
+      ? path.join(__dirname, '../resources/icon-512x512.png')
+      : path.join(__dirname, '../resources/icon-512x512-testnet.png');
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -81,9 +83,11 @@ const createWindow = async () => {
     height: mainWindowState.height,
     frame: process.platform !== 'darwin',
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : 'default',
-    icon: path.join(__dirname, '../resources/icon-512x512.png'),
+    icon: iconPath,
+    title: `Stacks Wallet` + (process.env.STX_NETWORK === 'testnet' ? ' Testnet' : ''),
     webPreferences: {
       disableBlinkFeatures: 'Auxclick',
+      spellcheck: false,
       webSecurity: true,
       nodeIntegration: false,
       nodeIntegrationInWorker: false,
@@ -138,15 +142,9 @@ const createWindow = async () => {
   const menuBuilder = new MenuBuilder(mainWindow);
   menuBuilder.buildMenu();
 
-  // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
-  new AppUpdater();
-
-  session
-    .fromPartition('some-partition')
-    .setPermissionRequestHandler((_webContents, _permission, callback) => {
-      callback(false);
-    });
+  session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false);
+  });
 };
 
 app.on('web-contents-created', (_event, contents) => {
@@ -174,14 +172,17 @@ app.on('activate', () => {
   if (mainWindow === null) void createWindow();
 });
 
-const store = new Store();
+validateConfig(app);
+
+const store = new Store({
+  clearInvalidConfig: true,
+});
 
 ipcMain.handle('store-set', (_e, { key, value }: any) => store.set(key, value));
 ipcMain.handle('store-get', (_e, { key }: any) => store.get(key));
 ipcMain.handle('store-delete', (_e, { key }: any) => store.delete(key));
 // ipcMain.handle('store-getEntireStore', () => store.store);
 ipcMain.handle('store-clear', () => store.clear());
-
 ipcMain.on('store-getEntireStore', event => {
   event.returnValue = store.store;
 });

@@ -1,14 +1,28 @@
+import urljoin from 'url-join';
 import { isWebUri } from 'valid-url';
+import { EXPLORER_URL, NETWORK } from '@constants/index';
 
 export async function openExternalLink(url: string) {
-  if (!isWebUri(url)) throw new Error('Attempted to open suspicious uri');
+  if (!isWebUri(url)) return;
   return api.openExternalLink(url);
 }
 
-export function makeExplorerLink(txId: string) {
-  return `https://testnet-explorer.blockstack.org/txid/${txId}?w`;
+export function makeExplorerLink(path: string) {
+  return urljoin(EXPLORER_URL, `${path}?utm_source=stacks-wallet&chain=${NETWORK}`);
 }
 
-export async function openInExplorer(txid: string) {
-  return openExternalLink(makeExplorerLink(txid));
+export function makeExplorerTxLink(txId: string) {
+  return makeExplorerLink(`/txid/${txId}`);
+}
+
+export async function openTxInExplorer(txid: string) {
+  return openExternalLink(makeExplorerTxLink(txid));
+}
+
+export function makeExplorerAddressLink(address: string) {
+  return makeExplorerLink(`/address/${address}`);
+}
+
+export async function openAddressInExplorer(address: string) {
+  return openExternalLink(makeExplorerAddressLink(address));
 }

@@ -36,12 +36,20 @@ export const TitleBar: FC = () => {
   const content = (
     <Flex
       justifyContent="space-between"
-      pl="90px"
+      pl={process.platform === 'darwin' ? '90px' : 'tight'}
       height="100%"
       backgroundColor={winState === 'focused' ? 'white' : '#FAFAFC'}
     >
       <BackButton backUrl={backUrl} hasFocus={winState === 'focused'} onClick={handleHistoryBack} />
-      <Flex justifyContent="space-around" flex={1}>
+      <Flex
+        justifyContent="space-around"
+        flex={1}
+        // Manages absolute centre alignment of content
+        position={['relative', 'absolute']}
+        left={[null, '130px']}
+        right={[null, '130px']}
+        height="100%"
+      >
         <Flex>
           {isNewerReleaseAvailable && latestRelease && (
             <UpdateAvailableButton

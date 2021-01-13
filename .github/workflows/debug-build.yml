@@ -1,156 +1,142 @@
-name: Debug build
+# name: Debug build
 
-on: [pull_request]
+# on: [pull_request]
 
-jobs:
-  testrelease:
-    runs-on: ubuntu-latest
-    outputs:
-      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
-      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
+# jobs:
+#   announce-start:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
+#     steps:
+#       - uses: lucasmotta/pull-request-sticky-header@1.0.0
+#         with:
+#           header: '> _Currently building new release, please wait for the latest_&nbsp; <img src="https://user-images.githubusercontent.com/1618764/97873036-51dfb200-1d17-11eb-89f5-0a922dc3ac92.gif" width="12" />'
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download distributables
-        uses: actions/download-artifact@v2
-        with:
-          path: release/
+#   debug-build:
+#     runs-on: ${{ matrix.os }}
+#     needs:
+#       - announce-start
 
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v2.5.3
-        id: semantic
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN || secrets.GITHUB_TOKEN }}
-          SEMANTIC_RELEASE_PACKAGE: ${{ github.workflow }}
-        with:
-          branches: |
-            ['feat/show-mempool-txs']
-          extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
+#     env:
+#       STX_NETWORK: ${{ matrix.stx_network }}
 
-  build:
-    runs-on: ${{ matrix.os }}
+#     strategy:
+#       matrix:
+#         os: [macos-latest, ubuntu-latest, windows-latest]
+#         stx_network: [testnet, mainnet]
+#         include:
+#           - os: macos-latest
+#             NPM_COMMAND: mac
+#             UPLOAD_ASSETS: release/**/*.dmg
+#             CSC_LINK_SECRET_NAME: CODE_SIGNING_CERTIFICATE_APPLE
+#             CSC_KEY_PASSWORD_SECRET_NAME: CODE_SIGNING_PASSWORD_APPLE
 
-    needs:
-      - testrelease
+#           - os: ubuntu-latest
+#             NPM_COMMAND: linux
+#             UPLOAD_ASSETS: |
+#               release/**/*.deb
+#               release/**/*.rpm
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        stx_network: [testnet, mainnet]
-        include:
-          # - os: macos-latest
-          # NPM_COMMAND: mac
+#           - os: windows-latest
+#             NPM_COMMAND: win
+#             UPLOAD_ASSETS: release/**/*.exe
+#             CSC_LINK_SECRET_NAME: CODE_SIGNING_CERTIFICATE_WINDOWS
+#             CSC_KEY_PASSWORD_SECRET_NAME: CODE_SIGNING_PASSWORD_WINDOWS
 
-          - os: ubuntu-latest
-            NPM_COMMAND: linux
+#     steps:
+#       - name: Cancel Previous Runs
+#         uses: styfle/cancel-workflow-action@0.6.0
+#         with:
+#           access_token: ${{ secrets.GITHUB_TOKEN }}
 
-          # - os: windows-latest
-          #   NPM_COMMAND: win
+#       - name: Check out Git repository
+#         uses: actions/checkout@v1
 
-    steps:
-      - name: Check out Git repository
-        uses: actions/checkout@v1
+#       - uses: actions/cache@v2
+#         id: cache-node-modules
+#         with:
+#           path: '**/node_modules'
+#           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/package.json') }}
 
-      - name: Gets semantic release info
-        id: semantic_release_info
-        uses: jossef/action-semantic-release-info@v1
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
+#       - name: Variables
+#         id: vars
+#         run: |
+#           echo "::set-output name=version::$(cat package.json | jq -r .version)"
+#           echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
+#           echo "::set-output name=pull_request_id::$(echo $GITHUB_REF)"
 
-      - run: echo ${{ steps.semantic_release_info.outputs.git_tag }}
-      - run: echo ${{ steps.semantic_release_info.outputs.notes }}
+#       - name: Install code-signing certs - Apple only
+#         uses: apple-actions/import-codesign-certs@v1
+#         if: matrix.os == 'macos-latest'
+#         with:
+#           p12-file-base64: ${{ secrets.CODE_SIGNING_CERTIFICATE_APPLE }}
+#           p12-password: ${{ secrets.CODE_SIGNING_PASSWORD_APPLE }}
 
-      - run: echo ${{needs.testrelease.outputs.new_release_version}}
-      - run: echo ${{needs.testrelease.outputs.new_release_published}}
-      # - run: echo ${{toJSON(needs.testrelease.outputs)}}
+#       - name: Setup node
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: 12
 
-      - uses: FranzDiebold/github-env-vars-action@v1.2.1
-      - name: Print environment variables
-        run: |
-          echo "GITHUB_REPOSITORY_SLUG=$GITHUB_REPOSITORY_SLUG"
-          echo "GITHUB_REPOSITORY_OWNER=$GITHUB_REPOSITORY_OWNER"
-          echo "GITHUB_REPOSITORY_OWNER_SLUG=$GITHUB_REPOSITORY_OWNER_SLUG"
-          echo "GITHUB_REPOSITORY_NAME=$GITHUB_REPOSITORY_NAME"
-          echo "GITHUB_REPOSITORY_NAME_SLUG=$GITHUB_REPOSITORY_NAME_SLUG"
-          echo "GITHUB_REF_SLUG=$GITHUB_REF_SLUG"
-          echo "GITHUB_REF_NAME=$GITHUB_REF_NAME"
-          echo "GITHUB_REF_NAME_SLUG=$GITHUB_REF_NAME_SLUG"
-          echo "GITHUB_SHA_SHORT=$GITHUB_SHA_SHORT"
-          echo "GITHUB_SHA=$GITHUB_SHA"
-      - name: Variables
-        id: vars
-        run: |
-          echo "::set-output name=version::$(cat package.json | jq -r .version)"
-          echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
-          echo "::set-output name=pull_request_id::$(echo $GITHUB_REF)"
+#       #
+#       # Windows build breaks when using the package.json script to install `app/` packages
+#       # using separate run to install those packages separately
+#       - name: Install packages
+#         uses: nick-invision/retry@v2
+#         if: steps.cache-node-modules.outputs.cache-hit != 'true'
+#         with:
+#           timeout_seconds: 600
+#           max_attempts: 3
+#           retry_on: error
+#           command: yarn --frozen-lockfile --ignore-scripts
 
-      - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v1
-        with:
-          node-version: 10
+#       - name: Install `app/` packages
+#         if: steps.cache-node-modules.outputs.cache-hit != 'true'
+#         run: cd app && yarn --frozen-lockfile --ignore-scripts
 
-      #
-      # Windows build breaks when using the package.json script to install `app/` packages
-      # using separate run to install those packages separately
-      - name: Install packages
-        run: yarn --frozen-lockfile --ignore-scripts
-        env:
-          STX_NETWORK: ${{ matrix.stx_network }}
+#       - name: Extract version
+#         id: extract_version
+#         uses: Saionaro/extract-package-version@v1.0.6
 
-      - name: Install `app/` packages
-        run: cd app && yarn --frozen-lockfile --ignore-scripts
-        env:
-          STX_NETWORK: ${{ matrix.stx_network }}
+#       - name: Build releases
+#         run: ./node_modules/.bin/cross-env yarn package-${{ matrix.NPM_COMMAND }}
+#         env:
+#           DEBUG_PROD: true
+#           NODE_ENV: production
+#           SHA: ${{ github.event.pull_request.head.sha }}
+#           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#           PULL_REQUEST: ${{ steps.vars.outputs.pull_request_id }}
+#           BRANCH_NAME: ${{ steps.vars.outputs.branch_name }}
+#           CSC_LINK: ${{ secrets[matrix.CSC_LINK_SECRET_NAME] }}
+#           CSC_KEY_PASSWORD: ${{ secrets[matrix.CSC_KEY_PASSWORD_SECRET_NAME] }}
+#           APPLE_ID: ${{ secrets.APPLE_ID }}
+#           APPLE_ID_PASS: ${{ secrets.APPLE_ID_PASS }}
 
-      - name: Build releases
-        run: ./node_modules/.bin/cross-env DEBUG_PROD=true yarn package-${{ matrix.NPM_COMMAND }}
-        env:
-          SHA: ${{ github.event.pull_request.head.sha }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PULL_REQUEST: ${{ steps.vars.outputs.pull_request_id }}
-          BRANCH_NAME: ${{ steps.vars.outputs.branch_name }}
-          STX_NETWORK: ${{ matrix.stx_network }}
+#       - run: ls -R release
 
-      - run: ls -R release
+#       - uses: actions/upload-artifact@v2
+#         name: ${{ matrix.NPM_COMMAND }} ${{ matrix.stx_network }} upload
+#         with:
+#           name: stacks-wallet-${{ matrix.stx_network }}-${{ matrix.NPM_COMMAND }}
+#           path: ${{ matrix.UPLOAD_ASSETS }}
 
-      - uses: actions/upload-artifact@v2
-        name: Upload Windows builds
-        if: matrix.os == 'windows-latest'
-        with:
-          name: stacks-wallet-${{ steps.vars.outputs.version }}-${{ matrix.stx_network }}-windows
-          path: |
-            release/**/*.exe
-            release/**/*.msi
-      - uses: actions/upload-artifact@v2
-        name: Upload MacOS builds
-        if: matrix.os == 'macos-latest'
-        with:
-          name: stacks-wallet-${{ steps.vars.outputs.version }}-${{ matrix.stx_network }}-macos
-          path: release/**/*.dmg
+#   announce-completion:
+#     runs-on: ubuntu-latest
 
-      - uses: actions/upload-artifact@v2
-        name: Upload Linux builds
-        if: matrix.os == 'ubuntu-latest'
-        with:
-          name: stacks-wallet-${{ steps.vars.outputs.version }}-${{ matrix.stx_network }}-linux
-          path: |
-            release/**/*.deb
-            release/**/*.rpm
+#     if: always()
 
-      - uses: lucasmotta/pull-request-sticky-header@1.0.0
-        if: (!contains(needs.*.result, 'failure'))
-        with:
-          header: '> [Download the latest build](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#     needs:
+#       - debug-build
 
-      # Remove header if build failed
-      - uses: lucasmotta/pull-request-sticky-header@1.0.0
-        if: (contains(needs.*.result, 'failure'))
-        with:
-          header: '> _Build failed, [see here for details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})_'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#     steps:
+#       - uses: lucasmotta/pull-request-sticky-header@1.0.0
+#         if: (!contains(needs.*.result, 'failure'))
+#         with:
+#           header: '> [Download the latest build](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})'
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#       # Remove header if build failed
+#       - uses: lucasmotta/pull-request-sticky-header@1.0.0
+#         if: (contains(needs.*.result, 'failure'))
+#         with:
+#           header: '> _Build failed, [see here for details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})_'
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
