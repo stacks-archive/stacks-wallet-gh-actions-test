@@ -1,0 +1,54 @@
+name: Release signatures
+
+on:
+  release:
+    types: [published, edited]
+
+jobs:
+  make-signatures:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+      - name: Dump job context
+        env:
+          JOB_CONTEXT: ${{ toJson(job) }}
+        run: echo "$JOB_CONTEXT"
+      - name: Dump steps context
+        env:
+          STEPS_CONTEXT: ${{ toJson(steps) }}
+        run: echo "$STEPS_CONTEXT"
+      - name: Dump runner context
+        env:
+          RUNNER_CONTEXT: ${{ toJson(runner) }}
+        run: echo "$RUNNER_CONTEXT"
+      - name: Dump strategy context
+        env:
+          STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        run: echo "$STRATEGY_CONTEXT"
+      - name: Dump matrix context
+        env:
+          MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        run: echo "$MATRIX_CONTEXT"
+
+      - name: Flatten assets to root dir
+        run: find downloads -type f -depth 2 -exec mv '{}' . \; && rm -rf downloads
+
+      - run: ls | xargs -I{} shasum -a 256 {} | tee -a shasum.txt
+
+      - name: Import GPG key
+        id: import_gpg_key
+        uses: crazy-max/ghaction-import-gpg@v3
+        with:
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+
+      - run: gpg --armor --output shasum.txt.asc --clearsign shasum.txt
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: shasum.txt.asc
+          path: shasum.txt.asc
